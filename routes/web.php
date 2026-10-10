@@ -6,6 +6,7 @@ use App\Http\Controllers\StorageLocationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\StaffController;
+use App\Http\Controllers\InventoryItemController;
 
 Route::get('/', function () {
     return auth()->check()
@@ -30,6 +31,19 @@ Route::middleware('guest')->group(function () {
 
 // Authenticated Routes
 Route::middleware(['auth', \App\Http\Middleware\NoCacheMiddleware::class])->group(function () {
+
+     // Module 1: Food & Beverage Inventory Management
+    Route::get('/inventory', [InventoryItemController::class, 'index'])
+        ->name('inventory.index');
+    
+    // Show Add Inventory Form
+    Route::get('/inventory/create', [InventoryItemController::class, 'create'])
+        ->name('inventory.create');
+
+    // Save New Inventory Item
+    Route::post('/inventory', [InventoryItemController::class, 'store'])
+        ->name('inventory.store');
+
 
     // Module 3: Storage Location Management
     Route::resource('storage-locations', StorageLocationController::class)

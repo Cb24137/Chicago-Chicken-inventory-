@@ -76,16 +76,48 @@ public function edit(string $id)
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
-    {
-        //
-    }
+    
+public function update(Request $request, string $id)
+{
+    // Find inventory item
+    $inventoryItem = InventoryItem::findOrFail($id);
+
+    // Validate updated information
+    $validated = $request->validate([
+        'item_name' => 'required|string|max:255',
+        'category' => 'required|in:Food,Beverage',
+        'unit' => 'required|in:kg,litre,pcs',
+        'quantity' => 'required|numeric|min:0',
+        'minimum_stock' => 'required|numeric|min:0',
+        'unit_price' => 'required|numeric|min:0',
+    ]);
+
+    // Update inventory record
+    $inventoryItem->update($validated);
+
+    // Redirect to inventory list
+    return redirect()
+        ->route('inventory.index')
+        ->with('success', 'Inventory item updated successfully!');
+}
+
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
-    {
-        //
-    }
+    
+public function destroy(string $id)
+{
+    // Find inventory item
+    $inventoryItem = InventoryItem::findOrFail($id);
+
+    // Delete inventory item
+    $inventoryItem->delete();
+
+    // Redirect to inventory list
+    return redirect()
+        ->route('inventory.index')
+        ->with('success', 'Inventory item deleted successfully!');
+}
+
 }

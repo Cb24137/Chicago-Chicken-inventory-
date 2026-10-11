@@ -43,6 +43,18 @@ Route::middleware(['auth', \App\Http\Middleware\NoCacheMiddleware::class])->grou
     // Save New Inventory Item
     Route::post('/inventory', [InventoryItemController::class, 'store'])
         ->name('inventory.store');
+    
+    // Show Edit Inventory Form
+    Route::get('/inventory/{id}/edit', [InventoryItemController::class, 'edit'])
+        ->name('inventory.edit');
+
+    // Update Inventory Item
+    Route::put('/inventory/{id}', [InventoryItemController::class, 'update'])
+        ->name('inventory.update');
+    
+    // Delete Inventory Item
+    Route::delete('/inventory/{id}', [InventoryItemController::class, 'destroy'])
+        ->name('inventory.destroy');
 
 
     // Module 3: Storage Location Management

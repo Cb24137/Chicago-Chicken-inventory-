@@ -141,15 +141,27 @@
                                 </td>
 
                                 <td>
-                                    <button class="btn btn-sm btn-outline-primary"
-                                            disabled>
-                                        Edit
-                                    </button>
+                                    
+<a href="{{ route('inventory.edit', $item->id) }}"
+   class="btn btn-sm btn-outline-primary">
+    Edit
+</a>
 
-                                    <button class="btn btn-sm btn-outline-danger"
-                                            disabled>
-                                        Delete
-                                    </button>
+
+                                    
+<form action="{{ route('inventory.destroy', $item->id) }}"
+      method="POST"
+      class="d-inline"
+      onsubmit="return confirm('Are you sure you want to delete this inventory item?');">
+
+    @csrf
+    @method('DELETE')
+
+    <button type="submit" class="btn btn-sm btn-outline-danger">
+        Delete
+    </button>
+</form>
+
                                 </td>
                             </tr>
                         @empty

@@ -1,4 +1,3 @@
-
 <?php
 
 use Illuminate\Support\Facades\Route;
@@ -6,6 +5,7 @@ use App\Http\Controllers\StorageLocationController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\StaffController;
+use App\Http\Controllers\WasteExpiryRecordController;
 
 Route::get('/', function () {
     return auth()->check()
@@ -36,6 +36,9 @@ Route::middleware(['auth', \App\Http\Middleware\NoCacheMiddleware::class])->grou
         ->except(['show'])
         ->parameters(['storage-locations' => 'storageLocation']);
 
+// Module 4: Waste & Expiry Management
+Route::resource('waste-expiry', WasteExpiryRecordController::class)
+    ->parameters(['waste-expiry' => 'wasteExpiryRecord']);
 
     // Dashboard
     Route::get('/dashboard', [
@@ -95,6 +98,7 @@ Route::middleware(['auth', \App\Http\Middleware\NoCacheMiddleware::class])->grou
 
 
         });
+
 
 });
 

@@ -1,58 +1,111 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Http\Request;
 use App\Http\Controllers\StorageLocationController;
+use App\Http\Controllers\SupplierController;
+use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\WasteExpiryRecordController;
 
-Route::get('/', function () {
-    return auth()->check()
+// ========================================
+// HOME PAGE
+// ========================================
+
+Route::get('/', function (Request $request) {
+    return $request->user()
         ? redirect()->route('dashboard')
         : redirect()->route('login');
 });
 
-// Guest Routes
+// ========================================
+// GUEST ROUTES
+// ========================================
+
 Route::middleware('guest')->group(function () {
 
+    // Show Login Page
     Route::get('/login', [
         LoginController::class,
         'showLoginForm'
     ])->name('login');
 
+    // Process Login
     Route::post('/login', [
         LoginController::class,
         'login'
     ]);
-
 });
 
-// Authenticated Routes
-Route::middleware(['auth', \App\Http\Middleware\NoCacheMiddleware::class])->group(function () {
+// ========================================
+// AUTHENTICATED ROUTES
+// ========================================
 
-    // Module 3: Storage Location Management
-    Route::resource('storage-locations', StorageLocationController::class)
+Route::middleware([
+    'auth',
+    \App\Http\Middleware\NoCacheMiddleware::class
+])->group(function () {
+
+    // ========================================
+    // MODULE 2: SUPPLIER & PURCHASE MANAGEMENT
+    // ========================================
+
+    // Supplier Management CRUD
+    Route::resource(
+        'suppliers',
+        SupplierController::class
+    )->except(['show']);
+
+    // Purchase Management CRUD
+    Route::resource(
+        'purchases',
+        PurchaseController::class
+    )->except(['show']);
+
+
+    // ========================================
+    // MODULE 3: STORAGE LOCATION MANAGEMENT
+    // ========================================
+
+    Route::resource(
+        'storage-locations',
+        StorageLocationController::class
+    )
         ->except(['show'])
-        ->parameters(['storage-locations' => 'storageLocation']);
+        ->parameters([
+            'storage-locations' => 'storageLocation'
+        ]);
 
 // Module 4: Waste & Expiry Management
 Route::resource('waste-expiry', WasteExpiryRecordController::class)
     ->parameters(['waste-expiry' => 'wasteExpiryRecord']);
 
-    // Dashboard
+    // ========================================
+    // DASHBOARD
+    // ========================================
+
     Route::get('/dashboard', [
         DashboardController::class,
         'index'
     ])->name('dashboard');
 
-    // Logout
+
+    // ========================================
+    // LOGOUT
+    // ========================================
+
     Route::post('/logout', [
         LoginController::class,
         'logout'
     ])->name('logout');
 
+
+    // ========================================
     // ADMIN ONLY ROUTES
+    // ========================================
+
     Route::middleware('admin')
         ->prefix('admin')
         ->name('admin.')
@@ -83,22 +136,22 @@ Route::resource('waste-expiry', WasteExpiryRecordController::class)
 
             // Edit Staff
             Route::get('/staff/{staff}/edit', [
-                StaffController::class, 'edit'
+                StaffController::class,
+                'edit'
             ])->name('staff.edit');
 
             // Update Staff
             Route::put('/staff/{staff}', [
-                StaffController::class, 'update'
+                StaffController::class,
+                'update'
             ])->name('staff.update');
 
             // Delete Staff
             Route::delete('/staff/{staff}', [
-                StaffController::class, 'destroy'
+                StaffController::class,
+                'destroy'
             ])->name('staff.destroy');
-
-
         });
 
 
 });
-

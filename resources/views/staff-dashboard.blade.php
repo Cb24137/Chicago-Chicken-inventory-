@@ -51,6 +51,11 @@
             Access your inventory management modules.
         </p>
     </header>
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> c6b956d (fix: make module 4 accessible from staff dashboard)
 
     <section class="section">
 
@@ -104,7 +109,8 @@
 
 
             <!-- MODULE 04 -->
-            <div class="card">
+            <a href="{{ route('waste-expiry.index') }}"
+               class="card module-link">
 
                 <span class="module-label">MODULE 04</span>
 
@@ -114,7 +120,7 @@
                     Monitor expired items and food wastage.
                 </p>
 
-            </div>
+            </a>
 
         </div>
 

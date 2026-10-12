@@ -58,19 +58,16 @@
 
         <div class="grid">
 
-            <!-- MODULE 01 -->
-            <div class="card">
+            
+<a href="{{ route('inventory.index') }}" class="card module-link">
+    <span class="module-label">MODULE 01</span>
+    <h3>Food &amp; Beverage Inventory</h3>
+    <p>
+        Manage ingredients, beverages
+        and stock levels.
+    </p>
+</a>
 
-                <span class="module-label">MODULE 01</span>
-
-                <h3>Food &amp; Beverage Inventory</h3>
-
-                <p>
-                    Manage ingredients, beverages
-                    and stock levels.
-                </p>
-
-            </div>
 
 
             <!-- MODULE 02: SUPPLIER & PURCHASE MANAGEMENT -->

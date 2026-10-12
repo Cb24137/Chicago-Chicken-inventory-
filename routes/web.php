@@ -8,6 +8,7 @@ use App\Http\Controllers\PurchaseController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\StaffController;
+use App\Http\Controllers\InventoryItemController;
 use App\Http\Controllers\WasteExpiryRecordController;
 
 // ========================================
@@ -52,6 +53,33 @@ Route::middleware([
     // MODULE 2: SUPPLIER & PURCHASE MANAGEMENT
     // ========================================
 
+     // Module 1: Food & Beverage Inventory Management
+    Route::get('/inventory', [InventoryItemController::class, 'index'])
+        ->name('inventory.index');
+    
+    // Show Add Inventory Form
+    Route::get('/inventory/create', [InventoryItemController::class, 'create'])
+        ->name('inventory.create');
+
+    // Save New Inventory Item
+    Route::post('/inventory', [InventoryItemController::class, 'store'])
+        ->name('inventory.store');
+    
+    // Show Edit Inventory Form
+    Route::get('/inventory/{id}/edit', [InventoryItemController::class, 'edit'])
+        ->name('inventory.edit');
+
+    // Update Inventory Item
+    Route::put('/inventory/{id}', [InventoryItemController::class, 'update'])
+        ->name('inventory.update');
+    
+    // Delete Inventory Item
+    Route::delete('/inventory/{id}', [InventoryItemController::class, 'destroy'])
+        ->name('inventory.destroy');
+
+
+    // Module 3: Storage Location Management
+    Route::resource('storage-locations', StorageLocationController::class)
     // Supplier Management CRUD
     Route::resource(
         'suppliers',

@@ -79,7 +79,7 @@ Route::middleware([
 
 
     // Module 3: Storage Location Management
-    Route::resource('storage-locations', StorageLocationController::class)
+    Route::resource('storage-locations', StorageLocationController::class);
     // Supplier Management CRUD
     Route::resource(
         'suppliers',

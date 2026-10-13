@@ -12,16 +12,16 @@
 
     <style>
         body {
-            background-color: #faf9f6;
+            background: #faf9f6;
             font-family: Arial, sans-serif;
             color: #4a2410;
         }
 
-        /* Navbar */
+        /* NAVBAR */
         .navbar {
-            background-color: #ffffff;
-            border-bottom: 1px solid #e9e3da;
-            padding: 15px 0;
+            background: #ffffff;
+            border-bottom: 1px solid #eee5da;
+            padding: 12px 0;
         }
 
         .navbar-brand img {
@@ -30,86 +30,161 @@
             object-fit: contain;
         }
 
-        .btn-back {
-            background-color: #fff8ef;
+        .btn-back,
+        .btn-cancel {
+            background: #fff8ef;
             color: #4a2410;
             border: none;
-            border-radius: 9px;
-            padding: 10px 20px;
+            border-radius: 10px;
+            padding: 11px 20px;
         }
 
-        .btn-back:hover {
-            background-color: #f5e9d8;
+        .btn-back:hover,
+        .btn-cancel:hover {
+            background: #f5e9d8;
             color: #4a2410;
         }
 
-        /* Page heading */
+        /* PAGE */
         .page-title {
-            color: #4a2410;
             font-weight: 700;
+            color: #4a2410;
         }
 
         .page-description {
             color: #938c83;
         }
 
-        /* Form card */
+        /* FORM CARD */
         .form-card {
-            background-color: #ffffff;
+            background: #ffffff;
             border: 1px solid #eee5da;
-            border-radius: 16px;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.03);
+            border-radius: 18px;
+            box-shadow: 0 5px 20px rgba(74, 36, 16, 0.04);
         }
 
-        /* Form fields */
         .form-label {
-            color: #4a2410;
             font-weight: 600;
+            margin-bottom: 9px;
+            color: #4a2410;
         }
 
         .form-control,
         .form-select {
             border: 1px solid #e5ddd2;
-            border-radius: 9px;
-            padding: 11px 14px;
-            color: #5b4637;
+            border-radius: 10px;
+            padding: 12px 15px;
+            color: #4a2410;
+            background-color: #ffffff;
         }
 
         .form-control:focus,
         .form-select:focus {
             border-color: #dc6500;
-            box-shadow: 0 0 0 0.2rem rgba(220, 101, 0, 0.12);
+            box-shadow: 0 0 0 .2rem rgba(220, 101, 0, .12);
         }
 
-        /* Update button */
+        .field-hint {
+            font-size: 12px;
+            color: #938c83;
+            margin-top: 6px;
+        }
+
+        /* CATEGORY CARDS */
+        .category-option {
+            position: relative;
+            display: block;
+            cursor: pointer;
+            height: 100%;
+        }
+
+        .category-option input {
+            position: absolute;
+            opacity: 0;
+            width: 1px;
+            height: 1px;
+        }
+
+        .category-content {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            padding: 17px;
+            border: 1.5px solid #e9dfd3;
+            border-radius: 13px;
+            background: #fffdfb;
+            transition: .2s ease;
+            height: 100%;
+        }
+
+        .category-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: #fff1df;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 25px;
+            flex-shrink: 0;
+        }
+
+        .category-name {
+            font-weight: 700;
+            margin-bottom: 3px;
+        }
+
+        .category-desc {
+            font-size: 12px;
+            color: #938c83;
+        }
+
+        .category-option input:checked + .category-content {
+            border-color: #dc6500;
+            background: #fff7ed;
+            box-shadow: 0 0 0 2px rgba(220, 101, 0, .08);
+        }
+
+        .category-option input:focus-visible + .category-content {
+            outline: 3px solid rgba(220, 101, 0, .35);
+            outline-offset: 3px;
+        }
+
+        .category-content:hover {
+            border-color: #dc6500;
+        }
+
+        /* SECTIONS */
+        .section-label {
+            color: #a55a23;
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 18px;
+        }
+
+        .section-divider {
+            border-top: 1px solid #f0e7dc;
+            margin: 26px 0;
+        }
+
+        /* BUTTONS */
         .btn-update {
-            background-color: #dc6500;
+            background: #dc6500;
             color: #ffffff;
             border: none;
-            border-radius: 9px;
-            padding: 11px 22px;
-            font-weight: 500;
+            border-radius: 10px;
+            padding: 12px 25px;
+            font-weight: 600;
         }
 
         .btn-update:hover {
-            background-color: #b95200;
+            background: #b95200;
             color: #ffffff;
         }
 
-        /* Cancel button */
-        .btn-cancel {
-            background-color: #fff8ef;
-            color: #4a2410;
-            border: none;
-            border-radius: 9px;
-            padding: 11px 22px;
-        }
-
-        .btn-cancel:hover {
-            background-color: #f5e9d8;
-            color: #4a2410;
-        }
-
+        /* RESPONSIVE */
         @media (max-width: 576px) {
             .navbar-brand img {
                 height: 50px;
@@ -118,196 +193,376 @@
             .page-title {
                 font-size: 25px;
             }
+
+            .category-content {
+                padding: 12px;
+            }
         }
     </style>
 </head>
 
 <body>
 
-    <!-- Navbar -->
-    <nav class="navbar">
-        <div class="container">
+<!-- NAVBAR -->
+<nav class="navbar">
+    <div class="container">
 
-            <a class="navbar-brand"
-               href="{{ route('dashboard') }}">
+        <a class="navbar-brand"
+           href="{{ route('dashboard') }}">
 
-                <img src="{{ asset('images/chicago-logo-transparent.png') }}"
-                     alt="Chicago Chicken City Logo">
+            <img src="{{ asset('images/chicago-logo-transparent.png') }}"
+                 alt="Chicago Chicken City Logo">
 
-            </a>
+        </a>
 
-            <a href="{{ route('inventory.index') }}"
-               class="btn btn-back">
-                Back to Inventory
-            </a>
+        <a href="{{ route('inventory.index') }}"
+           class="btn btn-back">
 
-        </div>
-    </nav>
+            ← Back to Inventory
 
-    <!-- Main content -->
-    <div class="container py-5">
+        </a>
 
-        <h2 class="page-title">
-            Edit Inventory Item
-        </h2>
+    </div>
+</nav>
 
-        <p class="page-description">
-            Update food or beverage inventory details.
-        </p>
+<!-- MAIN CONTENT -->
+<main class="container py-5">
 
-        <!-- Form card -->
-        <div class="card form-card mt-4">
-            <div class="card-body p-4">
+    <h2 class="page-title">
+        Edit Inventory Item
+    </h2>
 
-                <!-- Validation errors -->
-                @if ($errors->any())
-                    <div class="alert alert-danger">
-                        <ul class="mb-0">
-                            @foreach ($errors->all() as $error)
-                                <li>{{ $error }}</li>
-                            @endforeach
-                        </ul>
+    <p class="page-description">
+        Update food or beverage inventory details.
+    </p>
+
+    <!-- FORM CARD -->
+    <div class="card form-card mt-4">
+        <div class="card-body p-4 p-md-5">
+
+            <!-- VALIDATION ERRORS -->
+            @if ($errors->any())
+                <div class="alert alert-danger">
+                    <ul class="mb-0">
+                        @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
+            <!-- EDIT FORM -->
+            <form action="{{ route('inventory.update', $inventoryItem->id) }}"
+                  method="POST">
+
+                @csrf
+                @method('PUT')
+
+                <!-- ITEM INFORMATION -->
+                <div class="section-label">
+                    Item Information
+                </div>
+
+                <!-- ITEM NAME -->
+                <div class="mb-4">
+
+                    <label for="item_name" class="form-label">
+                        Item Name
+                    </label>
+
+                    <input type="text"
+                           id="item_name"
+                           name="item_name"
+                           class="form-control"
+                           value="{{ old('item_name', $inventoryItem->item_name) }}"
+                           placeholder="e.g. Chicken, French Fries, Cheese"
+                           required>
+
+                </div>
+
+                <!-- CATEGORY -->
+                <div class="mb-4">
+
+                    <label class="form-label d-block">
+                        Category
+                    </label>
+
+                    <div class="row g-3">
+
+                        <!-- FOOD -->
+                        <div class="col-md-6">
+
+                            <label class="category-option">
+
+                                <input type="radio"
+                                       name="category"
+                                       value="Food"
+                                       @checked(old('category', $inventoryItem->category) === 'Food')
+                                       required>
+
+                                <span class="category-content">
+
+                                    <span class="category-icon">
+                                        🍗
+                                    </span>
+
+                                    <span>
+                                        <span class="category-name d-block">
+                                            Food
+                                        </span>
+
+                                        <span class="category-desc d-block">
+                                            Ingredients, fries, cheese, vegetables
+                                        </span>
+                                    </span>
+
+                                </span>
+
+                            </label>
+
+                        </div>
+
+                        <!-- BEVERAGE -->
+                        <div class="col-md-6">
+
+                            <label class="category-option">
+
+                                <input type="radio"
+                                       name="category"
+                                       value="Beverage"
+                                       @checked(old('category', $inventoryItem->category) === 'Beverage')
+                                       required>
+
+                                <span class="category-content">
+
+                                    <span class="category-icon">
+                                        🥤
+                                    </span>
+
+                                    <span>
+                                        <span class="category-name d-block">
+                                            Beverage
+                                        </span>
+
+                                        <span class="category-desc d-block">
+                                            Soft drinks, juice, water and other drinks
+                                        </span>
+                                    </span>
+
+                                </span>
+
+                            </label>
+
+                        </div>
+
                     </div>
-                @endif
 
-                <form action="{{ route('inventory.update', $inventoryItem->id) }}"
-                      method="POST">
+                </div>
 
-                    @csrf
-                    @method('PUT')
+                <div class="section-divider"></div>
 
-                    <!-- Item Name -->
-                    <div class="mb-3">
-                        <label class="form-label">
-                            Item Name
+                <!-- STOCK DETAILS -->
+                <div class="section-label">
+                    Stock Details
+                </div>
+
+                <div class="row g-4">
+
+                    <!-- MEASUREMENT UNIT -->
+                    <div class="col-md-6">
+
+                        <label for="unit" class="form-label">
+                            Measurement Unit
                         </label>
 
-                        <input type="text"
-                               name="item_name"
-                               class="form-control"
-                               value="{{ old('item_name', $inventoryItem->item_name) }}"
-                               required>
-                    </div>
-
-                    <!-- Category -->
-                    <div class="mb-3">
-                        <label class="form-label">
-                            Category
-                        </label>
-
-                        <select name="category"
+                        <select id="unit"
+                                name="unit"
                                 class="form-select"
                                 required>
 
-                            <option value="Food"
-                                @selected(old('category', $inventoryItem->category) === 'Food')>
-                                Food
+                            <option value="">
+                                Choose a unit
                             </option>
 
-                            <option value="Beverage"
-                                @selected(old('category', $inventoryItem->category) === 'Beverage')>
-                                Beverage
-                            </option>
+                            <optgroup label="Weight">
+
+                                <option value="kg"
+                                    @selected(old('unit', $inventoryItem->unit) === 'kg')>
+                                    Kilogram (kg)
+                                </option>
+
+                                <option value="g"
+                                    @selected(old('unit', $inventoryItem->unit) === 'g')>
+                                    Gram (g)
+                                </option>
+
+                            </optgroup>
+
+                            <optgroup label="Volume">
+
+                                <option value="litre"
+                                    @selected(old('unit', $inventoryItem->unit) === 'litre')>
+                                    Litre (L)
+                                </option>
+
+                                <option value="ml"
+                                    @selected(old('unit', $inventoryItem->unit) === 'ml')>
+                                    Millilitre (ml)
+                                </option>
+
+                            </optgroup>
+
+                            <optgroup label="Quantity / Packaging">
+
+                                <option value="pcs"
+                                    @selected(old('unit', $inventoryItem->unit) === 'pcs')>
+                                    Pieces (pcs)
+                                </option>
+
+                                <option value="pack"
+                                    @selected(old('unit', $inventoryItem->unit) === 'pack')>
+                                    Pack
+                                </option>
+
+                                <option value="bottle"
+                                    @selected(old('unit', $inventoryItem->unit) === 'bottle')>
+                                    Bottle
+                                </option>
+
+                                <option value="can"
+                                    @selected(old('unit', $inventoryItem->unit) === 'can')>
+                                    Can
+                                </option>
+
+                                <option value="box"
+                                    @selected(old('unit', $inventoryItem->unit) === 'box')>
+                                    Box
+                                </option>
+
+                                <option value="bag"
+                                    @selected(old('unit', $inventoryItem->unit) === 'bag')>
+                                    Bag
+                                </option>
+
+                            </optgroup>
 
                         </select>
+
+                        <div class="field-hint">
+                            Choose how this item is measured or counted.
+                        </div>
+
                     </div>
 
-                    <!-- Unit -->
-                    <div class="mb-3">
-                        <label class="form-label">
-                            Unit
-                        </label>
+                    <!-- CURRENT QUANTITY -->
+                    <div class="col-md-6">
 
-                        <select name="unit"
-                                class="form-select"
-                                required>
-
-                            <option value="kg"
-                                @selected(old('unit', $inventoryItem->unit) === 'kg')>
-                                Kilogram (kg)
-                            </option>
-
-                            <option value="litre"
-                                @selected(old('unit', $inventoryItem->unit) === 'litre')>
-                                Litre
-                            </option>
-
-                            <option value="pcs"
-                                @selected(old('unit', $inventoryItem->unit) === 'pcs')>
-                                Pieces (pcs)
-                            </option>
-
-                        </select>
-                    </div>
-
-                    <!-- Quantity -->
-                    <div class="mb-3">
-                        <label class="form-label">
-                            Quantity
+                        <label for="quantity" class="form-label">
+                            Current Quantity
                         </label>
 
                         <input type="number"
+                               id="quantity"
                                name="quantity"
                                class="form-control"
                                value="{{ old('quantity', $inventoryItem->quantity) }}"
                                min="0"
                                step="0.01"
+                               placeholder="e.g. 20"
                                required>
+
+                        <div class="field-hint">
+                            Available stock currently in inventory.
+                        </div>
+
                     </div>
 
-                    <!-- Minimum Stock -->
-                    <div class="mb-3">
-                        <label class="form-label">
-                            Minimum Stock
+                    <!-- MINIMUM STOCK -->
+                    <div class="col-md-6">
+
+                        <label for="minimum_stock" class="form-label">
+                            Minimum Stock Level
                         </label>
 
                         <input type="number"
+                               id="minimum_stock"
                                name="minimum_stock"
                                class="form-control"
                                value="{{ old('minimum_stock', $inventoryItem->minimum_stock) }}"
                                min="0"
                                step="0.01"
+                               placeholder="e.g. 5"
                                required>
+
+                        <div class="field-hint">
+                            A low-stock alert appears when stock reaches this level.
+                        </div>
+
                     </div>
 
-                    <!-- Unit Price -->
-                    <div class="mb-3">
-                        <label class="form-label">
+                    <!-- UNIT PRICE -->
+                    <div class="col-md-6">
+
+                        <label for="unit_price" class="form-label">
                             Unit Price (RM)
                         </label>
 
-                        <input type="number"
-                               name="unit_price"
-                               class="form-control"
-                               value="{{ old('unit_price', $inventoryItem->unit_price) }}"
-                               min="0"
-                               step="0.01"
-                               required>
+                        <div class="input-group">
+
+                            <span class="input-group-text"
+                                  style="background:#fff8ef;border-color:#e5ddd2;">
+                                RM
+                            </span>
+
+                            <input type="number"
+                                   id="unit_price"
+                                   name="unit_price"
+                                   class="form-control"
+                                   value="{{ old('unit_price', $inventoryItem->unit_price) }}"
+                                   min="0"
+                                   step="0.01"
+                                   placeholder="0.00"
+                                   required>
+
+                        </div>
+
+                        <div class="field-hint">
+                            Price per selected measurement unit.
+                        </div>
+
                     </div>
 
-                    <!-- Action buttons -->
-                    <div class="d-flex gap-2 flex-wrap mt-4">
+                </div>
 
-                        <button type="submit"
-                                class="btn btn-update">
-                            Update Inventory
-                        </button>
+                <div class="section-divider"></div>
 
-                        <a href="{{ route('inventory.index') }}"
-                           class="btn btn-cancel">
-                            Cancel
-                        </a>
+                <!-- ACTION BUTTONS -->
+                <div class="d-flex gap-2 flex-wrap">
 
-                    </div>
+                    <button type="submit"
+                            class="btn btn-update">
 
-                </form>
+                        Update Inventory
 
-            </div>
+                    </button>
+
+                    <a href="{{ route('inventory.index') }}"
+                       class="btn btn-cancel">
+
+                        Cancel
+
+                    </a>
+
+                </div>
+
+            </form>
+
         </div>
-
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>

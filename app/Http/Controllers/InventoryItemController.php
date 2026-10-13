@@ -8,19 +8,17 @@ use App\Models\InventoryItem;
 class InventoryItemController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display all inventory items.
      */
-    
-public function index()
-{
-    $inventoryItems = InventoryItem::orderBy('item_name', 'asc')->get();
+    public function index()
+    {
+        $inventoryItems = InventoryItem::orderBy('item_name', 'asc')->get();
 
-    return view('inventory.index', compact('inventoryItems'));
-}
-
+        return view('inventory.index', compact('inventoryItems'));
+    }
 
     /**
-     * Show the form for creating a new resource.
+     * Show the Add Inventory form.
      */
     public function create()
     {
@@ -28,96 +26,80 @@ public function index()
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Store a new inventory item.
      */
-    
-public function store(Request $request)
-{
-    // Validate inventory information
-    $validated = $request->validate([
-        'item_name' => 'required|string|max:255',
-        'category' => 'required|in:Food,Beverage',
-        'unit' => 'required|in:kg,litre,pcs',
-        'quantity' => 'required|numeric|min:0',
-        'minimum_stock' => 'required|numeric|min:0',
-        'unit_price' => 'required|numeric|min:0',
-    ]);
-
-    // Save inventory item to database
-    InventoryItem::create($validated);
-
-    // Return to inventory list
-    return redirect()
-        ->route('inventory.index')
-        ->with('success', 'Inventory item added successfully!');
-}
-
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
+    public function store(Request $request)
     {
-        //
+        $validated = $request->validate([
+            'item_name' => 'required|string|max:255',
+            'category' => 'required|in:Food,Beverage',
+            'unit' => 'required|in:kg,g,litre,ml,pcs,pack,bottle,can,box,bag',
+            'quantity' => 'required|numeric|min:0',
+            'minimum_stock' => 'required|numeric|min:0',
+            'unit_price' => 'required|numeric|min:0',
+        ]);
+
+        InventoryItem::create($validated);
+
+        return redirect()
+            ->route('inventory.index')
+            ->with('success', 'Inventory item added successfully!');
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Display a specific inventory item.
      */
-    
-public function edit(string $id)
-{
-    $inventoryItem = InventoryItem::findOrFail($id);
+    public function show(string $id)
+    {
+        $inventoryItem = InventoryItem::findOrFail($id);
 
-    return view('inventory.edit', compact('inventoryItem'));
-}
-
+        return view('inventory.edit', compact('inventoryItem'));
+    }
 
     /**
-     * Update the specified resource in storage.
+     * Show the Edit Inventory form.
      */
-    
-public function update(Request $request, string $id)
-{
-    // Find inventory item
-    $inventoryItem = InventoryItem::findOrFail($id);
+    public function edit(string $id)
+    {
+        $inventoryItem = InventoryItem::findOrFail($id);
 
-    // Validate updated information
-    $validated = $request->validate([
-        'item_name' => 'required|string|max:255',
-        'category' => 'required|in:Food,Beverage',
-        'unit' => 'required|in:kg,litre,pcs',
-        'quantity' => 'required|numeric|min:0',
-        'minimum_stock' => 'required|numeric|min:0',
-        'unit_price' => 'required|numeric|min:0',
-    ]);
-
-    // Update inventory record
-    $inventoryItem->update($validated);
-
-    // Redirect to inventory list
-    return redirect()
-        ->route('inventory.index')
-        ->with('success', 'Inventory item updated successfully!');
-}
-
+        return view('inventory.edit', compact('inventoryItem'));
+    }
 
     /**
-     * Remove the specified resource from storage.
+     * Update an existing inventory item.
      */
-    
-public function destroy(string $id)
-{
-    // Find inventory item
-    $inventoryItem = InventoryItem::findOrFail($id);
+    public function update(Request $request, string $id)
+    {
+        $inventoryItem = InventoryItem::findOrFail($id);
 
-    // Delete inventory item
-    $inventoryItem->delete();
+        $validated = $request->validate([
+            'item_name' => 'required|string|max:255',
+            'category' => 'required|in:Food,Beverage',
+            'unit' => 'required|in:kg,g,litre,ml,pcs,pack,bottle,can,box,bag',
+            'quantity' => 'required|numeric|min:0',
+            'minimum_stock' => 'required|numeric|min:0',
+            'unit_price' => 'required|numeric|min:0',
+        ]);
 
-    // Redirect to inventory list
-    return redirect()
-        ->route('inventory.index')
-        ->with('success', 'Inventory item deleted successfully!');
-}
+        $inventoryItem->update($validated);
 
+        return redirect()
+            ->route('inventory.index')
+            ->with('success', 'Inventory item updated successfully!');
+    }
+
+    /**
+     * Delete an inventory item.
+     */
+    public function destroy(string $id)
+    {
+        $inventoryItem = InventoryItem::findOrFail($id);
+
+        $inventoryItem->delete();
+
+        return redirect()
+            ->route('inventory.index')
+            ->with('success', 'Inventory item deleted successfully!');
+    }
 }

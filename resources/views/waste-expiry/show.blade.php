@@ -1,73 +1,67 @@
+@extends('layouts.app')
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Waste Record Details | Chicago Chicken City</title>
-    <link rel="stylesheet" href="{{ asset('css/storage.css') }}">
-    <script src="{{ asset('js/auth-history.js') }}" defer></script>
-</head>
-<body>
-    <nav>
-        <img src="{{ asset('images/chicago-logo-transparent.png') }}"
-             alt="Chicago Chicken City">
-        <a href="{{ route('waste-expiry.index') }}" class="btn btn-light">
-            Back to Waste Records
-        </a>
-    </nav>
+@section('title', 'Waste Record Details')
 
-    <main>
-        <div class="header">
+@section('content')
+    <x-page-header
+        eyebrow="Waste & Expiry Management"
+        title="Waste Record Details"
+        description="Review the recorded waste or expiry information."
+        :back="route('waste-expiry.index')"
+        back-label="Back to waste records">
+        <x-slot:actions>
+            <a href="{{ route('waste-expiry.edit', $wasteExpiryRecord) }}" class="ccc-btn ccc-btn-primary">
+                <x-icon name="edit" /> Edit Record
+            </a>
+        </x-slot:actions>
+    </x-page-header>
+
+    <section class="ccc-card ccc-form-card" aria-labelledby="waste-record-title">
+        <div class="ccc-card-header" style="padding-bottom: 14px;">
+            <h2 id="waste-record-title" class="ccc-card-title">
+                <x-icon name="waste" /> {{ $wasteExpiryRecord->item_name }}
+            </h2>
+            <span class="ccc-badge {{ $wasteExpiryRecord->reason === 'expired' ? 'is-danger' : ($wasteExpiryRecord->reason === 'other' ? 'is-neutral' : 'is-warning') }}">
+                {{ ucfirst($wasteExpiryRecord->reason) }}
+            </span>
+        </div>
+
+        <dl class="ccc-details">
             <div>
-                <h1>Waste Record Details</h1>
-                <p>Review the recorded waste or expiry information.</p>
+                <dt>Item name</dt>
+                <dd>{{ $wasteExpiryRecord->item_name }}</dd>
             </div>
-            <a href="{{ route('waste-expiry.edit', $wasteExpiryRecord) }}"
-               class="btn btn-orange">Edit Record</a>
+            <div>
+                <dt>Quantity</dt>
+                <dd>{{ number_format((float) $wasteExpiryRecord->quantity, 2) }} {{ $wasteExpiryRecord->unit }}</dd>
+            </div>
+            <div>
+                <dt>Waste reason</dt>
+                <dd>{{ ucfirst($wasteExpiryRecord->reason) }}</dd>
+            </div>
+            <div>
+                <dt>Expiry date</dt>
+                <dd>{{ $wasteExpiryRecord->expiry_date ? $wasteExpiryRecord->expiry_date->format('d M Y') : 'Not provided' }}</dd>
+            </div>
+            <div>
+                <dt>Record date</dt>
+                <dd>{{ $wasteExpiryRecord->record_date->format('d M Y') }}</dd>
+            </div>
+            <div>
+                <dt>Recorded on</dt>
+                <dd>{{ $wasteExpiryRecord->created_at?->format('d M Y, g:i A') ?? '—' }}</dd>
+            </div>
+            <div class="is-full">
+                <dt>Description / remarks</dt>
+                <dd class="is-plain">{{ $wasteExpiryRecord->description ?: 'No description provided.' }}</dd>
+            </div>
+        </dl>
+
+        <div class="ccc-form-actions">
+            <a href="{{ route('waste-expiry.index') }}" class="ccc-btn ccc-btn-secondary">Back</a>
+            <a href="{{ route('waste-expiry.edit', $wasteExpiryRecord) }}" class="ccc-btn ccc-btn-primary">
+                <x-icon name="edit" /> Edit Record
+            </a>
         </div>
-
-        <div class="card form-card">
-            <div class="form-group">
-                <label>Item Name</label>
-                <p>{{ $wasteExpiryRecord->item_name }}</p>
-            </div>
-
-            <div class="form-group">
-                <label>Quantity</label>
-                <p>{{ number_format((float) $wasteExpiryRecord->quantity, 2) }}
-                   {{ $wasteExpiryRecord->unit }}</p>
-            </div>
-
-            <div class="form-group">
-                <label>Waste Reason</label>
-                <p>{{ ucfirst($wasteExpiryRecord->reason) }}</p>
-            </div>
-
-            <div class="form-group">
-                <label>Expiry Date</label>
-                <p>{{ $wasteExpiryRecord->expiry_date
-                    ? $wasteExpiryRecord->expiry_date->format('d M Y')
-                    : 'Not provided' }}</p>
-            </div>
-
-            <div class="form-group">
-                <label>Record Date</label>
-                <p>{{ $wasteExpiryRecord->record_date->format('d M Y') }}</p>
-            </div>
-
-            <div class="form-group">
-                <label>Description / Remarks</label>
-                <p>{{ $wasteExpiryRecord->description ?: 'No description provided.' }}</p>
-            </div>
-
-            <div class="form-actions">
-                <a href="{{ route('waste-expiry.index') }}"
-                   class="btn btn-light">Back</a>
-                <a href="{{ route('waste-expiry.edit', $wasteExpiryRecord) }}"
-                   class="btn btn-orange">Edit Record</a>
-            </div>
-        </div>
-    </main>
-</body>
-</html>
+    </section>
+@endsection

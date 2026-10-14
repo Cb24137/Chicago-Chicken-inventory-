@@ -1,113 +1,64 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport"
-          content="width=device-width, initial-scale=1">
+@extends('layouts.app')
 
-    <title>Edit Staff | Chicago Chicken City</title>
+@section('title', 'Edit Staff')
 
-    <link rel="stylesheet"
-          href="{{ asset('css/staff.css') }}">
-    <script src="{{ asset('js/auth-history.js') }}" defer></script>
-</head>
+@section('content')
+    <x-page-header
+        eyebrow="Administration · Admin only"
+        title="Edit Staff"
+        description="Update employee account information."
+        :back="route('admin.staff.index')"
+        back-label="Back to staff" />
 
-<body>
+    <form method="POST" action="{{ route('admin.staff.update', $staff) }}" class="ccc-card ccc-form-card">
+        @csrf
+        @method('PUT')
 
-<nav>
-    <img src="{{ asset('images/chicago-logo-transparent.png') }}"
-         alt="Chicago Chicken City">
+        <div class="ccc-form-section">
+            <h2 class="ccc-form-section-title">Account details</h2>
+            <p class="ccc-form-section-text">Leave the password fields blank to keep the current password.</p>
 
-    <a href="{{ route('admin.staff.index') }}"
-       class="btn btn-light">
-        Back to Staff
-    </a>
-</nav>
+            <div class="ccc-form-grid">
+                <div class="ccc-field">
+                    <label for="name" class="ccc-label">Full name <span class="ccc-required">*</span></label>
+                    <input id="name" type="text" name="name" required
+                           value="{{ old('name', $staff->name) }}"
+                           class="ccc-input @error('name') is-invalid @enderror">
+                    <x-field-error name="name" />
+                </div>
 
-<main>
+                <div class="ccc-field">
+                    <label for="email" class="ccc-label">Email address <span class="ccc-required">*</span></label>
+                    <input id="email" type="email" name="email" required
+                           value="{{ old('email', $staff->email) }}"
+                           class="ccc-input @error('email') is-invalid @enderror">
+                    <x-field-error name="email" />
+                </div>
 
-    <div class="header">
-        <div>
-            <h1>Edit Staff</h1>
-            <p>Update employee account information.</p>
-        </div>
-    </div>
+                <div class="ccc-field">
+                    <label for="password" class="ccc-label">New password <span class="ccc-optional">(optional)</span></label>
+                    <input id="password" type="password" name="password" minlength="5"
+                           autocomplete="new-password"
+                           placeholder="Leave blank to keep current password"
+                           class="ccc-input @error('password') is-invalid @enderror">
+                    <x-field-error name="password" />
+                </div>
 
-    <div class="card form-card">
-
-        @if($errors->any())
-            <div class="alert error" role="alert">
-                <ul>
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+                <div class="ccc-field">
+                    <label for="password_confirmation" class="ccc-label">Confirm new password</label>
+                    <input id="password_confirmation" type="password" name="password_confirmation" minlength="5"
+                           autocomplete="new-password"
+                           placeholder="Confirm new password"
+                           class="ccc-input">
+                </div>
             </div>
-        @endif
+        </div>
 
-        <form method="POST"
-              action="{{ route('admin.staff.update', $staff) }}">
-
-            @csrf
-            @method('PUT')
-
-            <label for="name">Full Name</label>
-
-            <input
-                id="name"
-                type="text"
-                name="name"
-                value="{{ old('name', $staff->name) }}"
-                required
-            >
-
-            <label for="email">Email Address</label>
-
-            <input
-                id="email"
-                type="email"
-                name="email"
-                value="{{ old('email', $staff->email) }}"
-                required
-            >
-
-            <label for="password">New Password</label>
-
-            <input
-                id="password"
-                type="password"
-                name="password"
-                placeholder="Leave blank to keep current password"
-                minlength="5"
-                autocomplete="new-password"
-            >
-
-            <label for="password_confirmation">
-                Confirm New Password
-            </label>
-
-            <input
-                id="password_confirmation"
-                type="password"
-                name="password_confirmation"
-                placeholder="Confirm new password"
-                minlength="5"
-                autocomplete="new-password"
-            >
-
-            <button type="submit" class="btn btn-orange">
-                Save Changes
+        <div class="ccc-form-actions">
+            <button type="submit" class="ccc-btn ccc-btn-primary">
+                <x-icon name="check" /> Save Changes
             </button>
-
-            <a href="{{ route('admin.staff.index') }}"
-               class="btn btn-light">
-                Cancel
-            </a>
-
-        </form>
-    </div>
-
-</main>
-
-</body>
-</html>
+            <a href="{{ route('admin.staff.index') }}" class="ccc-btn ccc-btn-secondary">Cancel</a>
+        </div>
+    </form>
+@endsection

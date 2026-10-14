@@ -11,11 +11,28 @@ class InventoryItemController extends Controller
      * Display a listing of the resource.
      */
     
-public function index()
+public function index(Request $request)
 {
-    $inventoryItems = InventoryItem::orderBy('item_name', 'asc')->get();
+    // Optional search and filters
+    $search = trim((string) $request->input('search'));
+    $category = in_array($request->input('category'), InventoryItem::CATEGORIES, true) ? $request->input('category') : null;
+    $stock = array_key_exists((string) $request->input('stock'), InventoryItem::STOCK_STATUSES) ? $request->input('stock') : null;
 
-    return view('inventory.index', compact('inventoryItems'));
+    $inventoryItems = InventoryItem::query()
+        ->when($search !== '', fn ($query) => $query->where('item_name', 'like', "%{$search}%"))
+        ->when($category, fn ($query) => $query->where('category', $category))
+        ->stockStatus($stock)
+        ->orderBy('item_name', 'asc')
+        ->get();
+
+    // Totals for all items, whatever the filters
+    $summary = [
+        'items' => InventoryItem::count(),
+        'low' => InventoryItem::lowStock()->count(),
+        'value' => (float) InventoryItem::sum(\Illuminate\Support\Facades\DB::raw('quantity * unit_price')),
+    ];
+
+    return view('inventory.index', compact('inventoryItems', 'summary', 'search', 'category', 'stock'));
 }
 
 
@@ -36,7 +53,7 @@ public function store(Request $request)
     // Validate inventory information
     $validated = $request->validate([
         'item_name' => 'required|string|max:255',
-        'category' => 'required|in:Food,Beverage',
+        'category' => 'required|in:' . implode(',', InventoryItem::CATEGORIES),
         'unit' => 'required|in:kg,litre,pcs',
         'quantity' => 'required|numeric|min:0',
         'minimum_stock' => 'required|numeric|min:0',
@@ -85,7 +102,7 @@ public function update(Request $request, string $id)
     // Validate updated information
     $validated = $request->validate([
         'item_name' => 'required|string|max:255',
-        'category' => 'required|in:Food,Beverage',
+        'category' => 'required|in:' . implode(',', InventoryItem::CATEGORIES),
         'unit' => 'required|in:kg,litre,pcs',
         'quantity' => 'required|numeric|min:0',
         'minimum_stock' => 'required|numeric|min:0',

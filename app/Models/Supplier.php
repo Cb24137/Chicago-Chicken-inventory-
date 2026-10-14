@@ -9,15 +9,15 @@ class Supplier extends Model
 {
     use HasFactory;
 
+    // The old quantity, unit and total_cost columns are kept in the
+    // database for historical records, but are no longer edited here.
+    // Order quantities and costs now belong to purchase orders.
     protected $fillable = [
         'name',
         'phone',
         'email',
         'address',
         'products_supplied',
-        'quantity',
-        'unit',
-        'total_cost',
     ];
 
     protected $casts = [

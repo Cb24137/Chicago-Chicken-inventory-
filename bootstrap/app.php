@@ -1,6 +1,7 @@
 
 <?php
 
+use Illuminate\Database\QueryException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -20,5 +21,22 @@ return Application::configure(basePath: dirname(__DIR__))
 
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+
+        // MySQL is the only database. When XAMPP MySQL is stopped or the
+        // .env database settings are wrong, show a clear message.
+        $exceptions->render(function (QueryException $e) {
+            $cannotConnect = preg_match(
+                '/SQLSTATE\[HY000\] \[(1044|1045|1049|2002|2003|2005|2006)\]/',
+                $e->getMessage()
+            );
+
+            if (! $cannotConnect) {
+                return null;
+            }
+
+            return response()->view('errors.database-unavailable', [
+                'details' => config('app.debug') ? $e->getMessage() : null,
+            ], 503);
+        });
+
     })->create();

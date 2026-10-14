@@ -21,3 +21,7 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Database exports and backups (may contain private data)
+*.sql
+*.sql.gz

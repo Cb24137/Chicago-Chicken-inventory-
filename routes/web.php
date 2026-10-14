@@ -9,6 +9,8 @@ use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\Admin\StaffController;
 use App\Http\Controllers\InventoryItemController;
+use App\Http\Controllers\NotificationController;
+use App\Http\Controllers\ReportController;
 use App\Http\Controllers\WasteExpiryRecordController;
 
 // ========================================
@@ -50,10 +52,9 @@ Route::middleware([
 ])->group(function () {
 
     // ========================================
-    // MODULE 2: SUPPLIER & PURCHASE MANAGEMENT
+    // MODULE 1: FOOD & BEVERAGE INVENTORY
     // ========================================
 
-     // Module 1: Food & Beverage Inventory Management
     Route::get('/inventory', [InventoryItemController::class, 'index'])
         ->name('inventory.index');
     
@@ -78,19 +79,27 @@ Route::middleware([
         ->name('inventory.destroy');
 
 
-    // Module 3: Storage Location Management
-    Route::resource('storage-locations', StorageLocationController::class)
+    // ========================================
+    // MODULE 2: SUPPLIER & PURCHASE MANAGEMENT
+    // ========================================
+
     // Supplier Management CRUD
     Route::resource(
         'suppliers',
         SupplierController::class
     )->except(['show']);
 
-    // Purchase Management CRUD
+    // Confirm a purchase order was received (adds stock once)
+    Route::patch('/purchases/{purchase}/receive', [
+        PurchaseController::class,
+        'receive'
+    ])->name('purchases.receive');
+
+    // Purchase Order Management CRUD
     Route::resource(
         'purchases',
         PurchaseController::class
-    )->except(['show']);
+    );
 
 
     // ========================================
@@ -106,9 +115,12 @@ Route::middleware([
             'storage-locations' => 'storageLocation'
         ]);
 
-// Module 4: Waste & Expiry Management
-Route::resource('waste-expiry', WasteExpiryRecordController::class)
-    ->parameters(['waste-expiry' => 'wasteExpiryRecord']);
+    // ========================================
+    // MODULE 4: WASTE & EXPIRY MANAGEMENT
+    // ========================================
+
+    Route::resource('waste-expiry', WasteExpiryRecordController::class)
+        ->parameters(['waste-expiry' => 'wasteExpiryRecord']);
 
     // ========================================
     // DASHBOARD
@@ -118,6 +130,36 @@ Route::resource('waste-expiry', WasteExpiryRecordController::class)
         DashboardController::class,
         'index'
     ])->name('dashboard');
+
+    // ========================================
+    // REPORTS & ANALYTICS
+    // (staff: inventory, storage and waste reports; admins: all)
+    // ========================================
+
+    Route::get('/reports', [ReportController::class, 'index'])
+        ->name('reports.index');
+
+    Route::get('/reports/{report}', [ReportController::class, 'show'])
+        ->name('reports.show');
+
+    Route::get('/reports/{report}/export/{format}', [ReportController::class, 'export'])
+        ->name('reports.export');
+
+    // ========================================
+    // NOTIFICATION CENTER
+    // ========================================
+
+    Route::get('/notifications', [NotificationController::class, 'index'])
+        ->name('notifications.index');
+
+    Route::post('/notifications/read-all', [NotificationController::class, 'markAllAsRead'])
+        ->name('notifications.read-all');
+
+    Route::get('/notifications/{notification}/open', [NotificationController::class, 'open'])
+        ->name('notifications.open');
+
+    Route::patch('/notifications/{notification}/read', [NotificationController::class, 'markAsRead'])
+        ->name('notifications.read');
 
 
     // ========================================

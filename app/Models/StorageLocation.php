@@ -14,12 +14,14 @@ class StorageLocation extends Model
         'type',
         'description',
         'is_active',
+        'quantity',
     ];
 
     protected function casts(): array
     {
         return [
             'is_active' => 'boolean',
+            'quantity' => 'integer',
         ];
     }
 }

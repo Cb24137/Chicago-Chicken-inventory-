@@ -1,177 +1,129 @@
+@extends('layouts.app')
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Waste & Expiry Management | Chicago Chicken City</title>
-    <link rel="stylesheet" href="{{ asset('css/storage.css') }}">
-    <script src="{{ asset('js/auth-history.js') }}" defer></script>
-    <style>
-        .summary-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 16px;
-            margin: 24px 0;
-        }
-        .summary-card {
-            background: white;
-            border: 1px solid #eee2d6;
-            border-radius: 12px;
-            padding: 20px;
-        }
-        .summary-card p { color: #777; margin-bottom: 8px; }
-        .summary-card h2 { margin: 0; color: #713b18; }
-        .filters {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .filters input, .filters select {
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 8px;
-        }
-        .description-cell { min-width: 150px; }
-        @media (max-width: 600px) {
-            .table-wrap { overflow-x: auto; }
-            table { min-width: 850px; }
-        }
-    </style>
-</head>
-<body>
-<nav>
-    <img src="{{ asset('images/chicago-logo-transparent.png') }}"
-         alt="Chicago Chicken City">
-    <a href="{{ route('dashboard') }}" class="btn btn-light">Dashboard</a>
-</nav>
+@section('title', 'Waste & Expiry Management')
 
-<main>
-    <div class="header">
-        <div>
-            <h1>Waste & Expiry Management</h1>
-            <p>Track expired, spoiled, damaged and wasted food items.</p>
-        </div>
-        <a href="{{ route('waste-expiry.create') }}" class="btn btn-orange">
-            + Record Waste
-        </a>
+@section('content')
+    @php
+        $isFiltered = request()->filled('search') || request()->filled('reason');
+        $reasonTones = ['expired' => 'is-danger', 'spoiled' => 'is-warning', 'damaged' => 'is-warning', 'other' => 'is-neutral'];
+    @endphp
+
+    <x-page-header
+        title="Waste & Expiry Management"
+        description="Track expired, spoiled, damaged and wasted food items.">
+        <x-slot:actions>
+            <a href="{{ route('waste-expiry.create') }}" class="ccc-btn ccc-btn-primary">
+                <x-icon name="plus" /> Record Waste
+            </a>
+        </x-slot:actions>
+    </x-page-header>
+
+    <div class="ccc-stat-grid is-four ccc-mb">
+        <x-stat-card label="Total records" :value="number_format($totalRecords)" icon="waste" meta="All waste and expiry records" />
+        <x-stat-card label="Expired items" :value="number_format($expiredCount)" icon="calendar" meta="Expiry date has passed" />
+        <x-stat-card label="Spoiled records" :value="number_format($spoiledCount)" icon="alert" meta="Recorded as spoiled" />
+        <x-stat-card label="Damaged records" :value="number_format($damagedCount)" icon="inventory" meta="Recorded as damaged" />
     </div>
 
-    @if(session('success'))
-        <div class="alert success" role="status">
-            {{ session('success') }}
-        </div>
-    @endif
+    <section class="ccc-card ccc-card-clip" aria-label="Waste records">
+        <form method="GET" action="{{ route('waste-expiry.index') }}" class="ccc-filters" role="search">
+            <div class="ccc-field is-search">
+                <label for="search" class="ccc-label">Search</label>
+                <div class="ccc-input-icon-wrap">
+                    <x-icon name="search" />
+                    <input type="search" id="search" name="search" class="ccc-input"
+                           placeholder="Search item name..."
+                           value="{{ request('search') }}">
+                </div>
+            </div>
 
-    @if($errors->any())
-        <div class="alert error" role="alert">
-            {{ $errors->first() }}
-        </div>
-    @endif
+            <div class="ccc-field">
+                <label for="reason" class="ccc-label">Reason</label>
+                <select id="reason" name="reason" class="ccc-input">
+                    <option value="">All reasons</option>
+                    @foreach (['expired', 'spoiled', 'damaged', 'other'] as $reason)
+                        <option value="{{ $reason }}" @selected(request('reason') === $reason)>{{ ucfirst($reason) }}</option>
+                    @endforeach
+                </select>
+            </div>
 
-    <div class="summary-grid">
-        <div class="summary-card">
-            <p>Total Records</p>
-            <h2>{{ $totalRecords }}</h2>
-        </div>
-        <div class="summary-card">
-            <p>Expired Items</p>
-            <h2>{{ $expiredCount }}</h2>
-        </div>
-        <div class="summary-card">
-            <p>Spoiled Records</p>
-            <h2>{{ $spoiledCount }}</h2>
-        </div>
-        <div class="summary-card">
-            <p>Damaged Records</p>
-            <h2>{{ $damagedCount }}</h2>
-        </div>
-    </div>
+            <div class="ccc-filter-actions">
+                <button type="submit" class="ccc-btn ccc-btn-primary">
+                    <x-icon name="filter" /> Filter
+                </button>
+                <a href="{{ route('waste-expiry.index') }}" class="ccc-btn ccc-btn-secondary">Reset</a>
+            </div>
+        </form>
 
-    <form method="GET" action="{{ route('waste-expiry.index') }}"
-          class="filters">
-        <input type="search" name="search"
-               placeholder="Search item name..."
-               value="{{ request('search') }}">
+        @if ($records->isEmpty())
+            @if ($isFiltered)
+                <x-empty-state icon="search" title="No waste records match your filters">
+                    Try a different item name or reason.
+                </x-empty-state>
+            @else
+                <x-empty-state icon="waste" title="No waste records found">
+                    Select "Record Waste" to add your first record.
+                    <x-slot:action>
+                        <a href="{{ route('waste-expiry.create') }}" class="ccc-btn ccc-btn-primary">
+                            <x-icon name="plus" /> Record Waste
+                        </a>
+                    </x-slot:action>
+                </x-empty-state>
+            @endif
+        @else
+            <div class="ccc-table-wrap">
+                <table class="ccc-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Item Name</th>
+                            <th scope="col" class="is-num">Quantity</th>
+                            <th scope="col">Reason</th>
+                            <th scope="col">Expiry Date</th>
+                            <th scope="col">Record Date</th>
+                            <th scope="col">Description</th>
+                            <th scope="col" class="is-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($records as $record)
+                            <tr>
+                                <td>
+                                    <a href="{{ route('waste-expiry.show', $record) }}" class="ccc-cell-title">{{ $record->item_name }}</a>
+                                </td>
+                                <td class="is-num">{{ (float) $record->quantity }} {{ $record->unit }}</td>
+                                <td>
+                                    <span class="ccc-badge {{ $reasonTones[$record->reason] ?? 'is-neutral' }}">{{ ucfirst($record->reason) }}</span>
+                                </td>
+                                <td class="ccc-nowrap">{{ $record->expiry_date ? $record->expiry_date->format('d M Y') : '-' }}</td>
+                                <td class="ccc-nowrap">{{ $record->record_date->format('d M Y') }}</td>
+                                <td class="ccc-cell-wrap">{{ $record->description ?: '-' }}</td>
+                                <td class="is-actions">
+                                    <div class="ccc-table-actions">
+                                        <a href="{{ route('waste-expiry.show', $record) }}" class="ccc-btn ccc-btn-secondary ccc-btn-sm">
+                                            <x-icon name="eye" /> View
+                                        </a>
+                                        <a href="{{ route('waste-expiry.edit', $record) }}" class="ccc-btn ccc-btn-soft ccc-btn-sm">
+                                            <x-icon name="edit" /> Edit
+                                        </a>
+                                        <form method="POST"
+                                              action="{{ route('waste-expiry.destroy', $record) }}"
+                                              class="ccc-inline-form"
+                                              data-confirm="Delete this waste record?">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="ccc-btn ccc-btn-danger ccc-btn-sm">
+                                                <x-icon name="trash" /> Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
 
-        <select name="reason">
-            <option value="">All reasons</option>
-            @foreach(['expired', 'spoiled', 'damaged', 'other'] as $reason)
-                <option value="{{ $reason }}"
-                    @selected(request('reason') === $reason)>
-                    {{ ucfirst($reason) }}
-                </option>
-            @endforeach
-        </select>
-
-        <button type="submit" class="btn btn-orange">Filter</button>
-        <a href="{{ route('waste-expiry.index') }}"
-           class="btn btn-light">Reset</a>
-    </form>
-
-    <div class="card table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th>Item Name</th>
-                    <th>Quantity</th>
-                    <th>Reason</th>
-                    <th>Expiry Date</th>
-                    <th>Record Date</th>
-                    <th>Description</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @forelse($records as $record)
-                    <tr>
-                        <td>{{ $record->item_name }}</td>
-                        <td>{{ $record->quantity }} {{ $record->unit }}</td>
-                        <td>{{ ucfirst($record->reason) }}</td>
-                        <td>
-                            {{ $record->expiry_date
-                                ? $record->expiry_date->format('d M Y')
-                                : '-' }}
-                        </td>
-                        <td>{{ $record->record_date->format('d M Y') }}</td>
-                        <td class="description-cell">
-                            {{ $record->description ?: '-' }}
-                        </td>
-                        <td>
-                            <div class="actions">
-                                <a href="{{ route('waste-expiry.show', $record) }}"
-                                   class="btn btn-light">View</a>
-                                <a href="{{ route('waste-expiry.edit', $record) }}"
-                                   class="btn btn-edit">Edit</a>
-                                <form method="POST"
-                                      action="{{ route('waste-expiry.destroy', $record) }}"
-                                      onsubmit="return confirm('Delete this waste record?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="btn btn-delete">
-                                        Delete
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="7"
-                            style="text-align:center;padding:40px">
-                            No waste records found. Select "Record Waste" to
-                            add your first record.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    <div class="pagination">
-        {{ $records->links() }}
-    </div>
-</main>
-</body>
-</html>
+            {{ $records->links() }}
+        @endif
+    </section>
+@endsection

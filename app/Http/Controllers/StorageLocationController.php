@@ -11,13 +11,32 @@ use Illuminate\Validation\Rule;
 
 class StorageLocationController extends Controller
 {
-    // READ
-    public function index()
+    // READ (with optional search and filters)
+    public function index(Request $request)
     {
-        $locations = StorageLocation::latest()
-            ->paginate(10);
+        $search = trim((string) $request->input('search'));
+        $type = in_array($request->input('type'), ['Freezer', 'Refrigerator', 'Dry Storage'], true) ? $request->input('type') : null;
+        $status = in_array($request->input('status'), ['active', 'inactive'], true) ? $request->input('status') : null;
 
-        return view('storage-index', compact('locations'));
+        $locations = StorageLocation::query()
+            ->when($search !== '', fn ($query) => $query->where('name', 'like', "%{$search}%"))
+            ->when($type, fn ($query) => $query->where('type', $type))
+            ->when($status, fn ($query) => $query->where('is_active', $status === 'active'))
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        // Summary cards: totals for all locations, whatever the filters.
+        // Quantity is a whole-number item count with no unit, so it can be added up.
+        $summary = [
+            'total' => StorageLocation::count(),
+            'active' => StorageLocation::where('is_active', true)->count(),
+            'items' => (int) StorageLocation::sum('quantity'),
+            'counted' => StorageLocation::whereNotNull('quantity')->count(),
+        ];
+        $summary['inactive'] = $summary['total'] - $summary['active'];
+
+        return view('storage-index', compact('locations', 'search', 'type', 'status', 'summary'));
     }
 
     // CREATE FORM
@@ -52,6 +71,13 @@ class StorageLocationController extends Controller
             'is_active' => [
                 'required',
                 'boolean',
+            ],
+            // Optional number of items kept at this location
+            'quantity' => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:1000000',
             ],
         ]);
 
@@ -97,6 +123,13 @@ class StorageLocationController extends Controller
             'is_active' => [
                 'required',
                 'boolean',
+            ],
+            // Optional number of items kept at this location
+            'quantity' => [
+                'nullable',
+                'integer',
+                'min:0',
+                'max:1000000',
             ],
         ]);
 

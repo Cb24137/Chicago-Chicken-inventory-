@@ -1,118 +1,153 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Storage Locations | Chicago Chicken City</title>
-    <link rel="stylesheet" href="{{ asset('css/storage.css') }}">
-    <script src="{{ asset('js/auth-history.js') }}" defer></script>
-</head>
-<body>
+@extends('layouts.app')
 
-<nav>
-    <img src="{{ asset('images/chicago-logo-transparent.png') }}"
-         alt="Chicago Chicken City">
+@section('title', 'Storage Locations')
 
-    <a href="{{ route('dashboard') }}" class="btn btn-light">
-        Dashboard
-    </a>
-</nav>
+@section('content')
+    @php
+        $isFiltered = $search !== '' || $type || $status;
+    @endphp
 
-<main>
-    <div class="header">
-        <div>
-            <h1>Storage Locations</h1>
-            <p>Manage food and beverage storage areas.</p>
-        </div>
+    <x-page-header
+        eyebrow="Food Storage & Inventory Location"
+        title="Storage Locations"
+        description="Manage food and beverage storage areas.">
+        <x-slot:actions>
+            <a href="{{ route('storage-locations.create') }}" class="ccc-btn ccc-btn-primary">
+                <x-icon name="plus" /> Add Storage Location
+            </a>
+        </x-slot:actions>
+    </x-page-header>
 
-        <a href="{{ route('storage-locations.create') }}"
-           class="btn btn-orange">
-            + Add Storage Location
-        </a>
+    {{-- Totals for all locations (the search and filters below do not change them) --}}
+    <div class="ccc-stat-grid is-four ccc-mb">
+        <x-stat-card label="Total storage locations"
+                     :value="number_format($summary['total'])"
+                     icon="storage"
+                     meta="Freezers, refrigerators and dry storage" />
+        <x-stat-card label="Active locations"
+                     :value="number_format($summary['active'])"
+                     icon="check-circle"
+                     tone="success"
+                     meta="Currently in use" />
+        <x-stat-card label="Inactive locations"
+                     :value="number_format($summary['inactive'])"
+                     icon="close"
+                     meta="Not in use" />
+        <x-stat-card label="Recorded items"
+                     :value="number_format($summary['items'])"
+                     icon="inventory"
+                     :meta="'Item counts entered on ' . $summary['counted'] . ' of ' . $summary['total'] . ' ' . \Illuminate\Support\Str::plural('location', $summary['total'])" />
     </div>
 
-    @if(session('success'))
-        <div class="alert success" role="status">
-            {{ session('success') }}
-        </div>
-    @endif
+    <section class="ccc-card ccc-card-clip" aria-label="Storage locations">
+        <form method="GET" action="{{ route('storage-locations.index') }}" class="ccc-filters" role="search">
+            <div class="ccc-field is-search">
+                <label for="search" class="ccc-label">Search</label>
+                <div class="ccc-input-icon-wrap">
+                    <x-icon name="search" />
+                    <input type="search" id="search" name="search" class="ccc-input"
+                           value="{{ $search }}"
+                           placeholder="Location name">
+                </div>
+            </div>
 
-    @if($errors->any())
-        <div class="alert error" role="alert">
-            {{ $errors->first() }}
-        </div>
-    @endif
+            <div class="ccc-field">
+                <label for="type" class="ccc-label">Storage type</label>
+                <select id="type" name="type" class="ccc-input">
+                    <option value="">All types</option>
+                    @foreach (['Freezer', 'Refrigerator', 'Dry Storage'] as $option)
+                        <option value="{{ $option }}" @selected($type === $option)>{{ $option }}</option>
+                    @endforeach
+                </select>
+            </div>
 
-    <div class="card table-wrap">
-        <table>
-            <thead>
-                <tr>
-                    <th>Location Name</th>
-                    <th>Storage Type</th>
-                    <th>Description</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
+            <div class="ccc-field">
+                <label for="status" class="ccc-label">Status</label>
+                <select id="status" name="status" class="ccc-input">
+                    <option value="">Active and inactive</option>
+                    <option value="active" @selected($status === 'active')>Active</option>
+                    <option value="inactive" @selected($status === 'inactive')>Inactive</option>
+                </select>
+            </div>
 
-            <tbody>
-                @forelse($locations as $location)
-                    <tr>
-                        <td>{{ $location->name }}</td>
-                        <td>{{ $location->type }}</td>
-                        <td>{{ $location->description ?? '-' }}</td>
+            <div class="ccc-filter-actions">
+                <button type="submit" class="ccc-btn ccc-btn-primary">
+                    <x-icon name="filter" /> Filter
+                </button>
+                @if ($isFiltered)
+                    <a href="{{ route('storage-locations.index') }}" class="ccc-btn ccc-btn-secondary">Reset</a>
+                @endif
+            </div>
+        </form>
 
-                        <td>
-                            <span class="badge {{ $location->is_active ? 'active' : 'inactive' }}">
-                                {{ $location->is_active ? 'Active' : 'Inactive' }}
-                            </span>
-                        </td>
-
-                        <td>
-                            <div class="actions">
-                                <a href="{{ route('storage-locations.edit', $location) }}"
-                                   class="btn btn-edit">
-                                    Edit
-                                </a>
-
-                                <form method="POST"
-                                      action="{{ route('storage-locations.destroy', $location) }}"
-                                      onsubmit="return confirm('Delete this storage location?');">
-                                    @csrf
-                                    @method('DELETE')
-
-                                    <button type="submit" class="btn btn-delete">
-                                        Delete
-                                    </button>
-                                </form>
-                            </div>
-                        </td>
-                    </tr>
-                @empty
-                    <tr>
-                        <td colspan="5" style="text-align:center;padding:40px">
-                            No storage locations found.
-                        </td>
-                    </tr>
-                @endforelse
-            </tbody>
-        </table>
-    </div>
-
-    <div class="pagination">
-        @if($locations->previousPageUrl())
-            <a href="{{ $locations->previousPageUrl() }}"
-               class="btn btn-light">Previous</a>
+        @if ($locations->isEmpty() && $isFiltered)
+            <x-empty-state icon="search" title="No storage locations match your filters">
+                Try a different name, storage type or status.
+                <x-slot:action>
+                    <a href="{{ route('storage-locations.index') }}" class="ccc-btn ccc-btn-secondary">Clear filters</a>
+                </x-slot:action>
+            </x-empty-state>
+        @elseif ($locations->isEmpty())
+            <x-empty-state icon="storage" title="No storage locations found">
+                Add a freezer, refrigerator or dry storage area to get started.
+                <x-slot:action>
+                    <a href="{{ route('storage-locations.create') }}" class="ccc-btn ccc-btn-primary">
+                        <x-icon name="plus" /> Add Storage Location
+                    </a>
+                </x-slot:action>
+            </x-empty-state>
         @else
-            <span></span>
-        @endif
+            <div class="ccc-table-wrap">
+                <table class="ccc-table">
+                    <thead>
+                        <tr>
+                            <th scope="col">Location Name</th>
+                            <th scope="col">Storage Type</th>
+                            <th scope="col">Description</th>
+                            <th scope="col" class="is-num">Quantity</th>
+                            <th scope="col">Status</th>
+                            <th scope="col" class="is-actions">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ($locations as $location)
+                            <tr>
+                                <td><span class="ccc-cell-title">{{ $location->name }}</span></td>
+                                <td><span class="ccc-badge is-brand">{{ $location->type }}</span></td>
+                                <td class="ccc-cell-wrap">{{ $location->description ?? '-' }}</td>
+                                <td class="is-num">{{ $location->quantity !== null ? number_format($location->quantity) . ' ' . \Illuminate\Support\Str::plural('item', $location->quantity) : '-' }}</td>
+                                <td>
+                                    @if ($location->is_active)
+                                        <span class="ccc-badge is-success"><x-icon name="check-circle" /> Active</span>
+                                    @else
+                                        <span class="ccc-badge is-neutral"><x-icon name="close" /> Inactive</span>
+                                    @endif
+                                </td>
+                                <td class="is-actions">
+                                    <div class="ccc-table-actions">
+                                        <a href="{{ route('storage-locations.edit', $location) }}" class="ccc-btn ccc-btn-soft ccc-btn-sm">
+                                            <x-icon name="edit" /> Edit
+                                        </a>
 
-        @if($locations->nextPageUrl())
-            <a href="{{ $locations->nextPageUrl() }}"
-               class="btn btn-light">Next</a>
-        @endif
-    </div>
-</main>
+                                        <form method="POST"
+                                              action="{{ route('storage-locations.destroy', $location) }}"
+                                              class="ccc-inline-form"
+                                              data-confirm="Delete this storage location?">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="ccc-btn ccc-btn-danger ccc-btn-sm">
+                                                <x-icon name="trash" /> Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
 
-</body>
-</html>
+            {{ $locations->links() }}
+        @endif
+    </section>
+@endsection

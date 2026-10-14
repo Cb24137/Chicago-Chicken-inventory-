@@ -46,9 +46,20 @@ class WasteExpiryRecordController extends Controller
         ));
     }
 
-    public function create()
+    public function create(Request $request)
     {
-        return view('waste-expiry.create');
+        // Optional starting values, e.g. "Record waste" on the dashboard's
+        // expiry watch. Invalid values are ignored.
+        $prefill = validator($request->only(['item_name', 'unit', 'reason', 'expiry_date']), [
+            'item_name' => ['string', 'max:255'],
+            'unit' => [Rule::in(['kg', 'g', 'litre', 'ml', 'pcs', 'pack', 'bottle', 'box'])],
+            'reason' => [Rule::in(['expired', 'spoiled', 'damaged', 'other'])],
+            'expiry_date' => ['date_format:Y-m-d'],
+        ])->valid();
+
+        return view('waste-expiry.create', [
+            'wasteExpiryRecord' => new WasteExpiryRecord($prefill),
+        ]);
     }
 
     public function store(Request $request)

@@ -1,123 +1,88 @@
+@extends('layouts.app')
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+@section('title', 'Staff Dashboard')
 
-    <title>Staff Dashboard | Chicago Chicken City</title>
+@section('content')
+    {{-- Daily operations view. Every figure comes from the database. --}}
+    @php
+        $plural = fn (string $word, $count) => \Illuminate\Support\Str::plural($word, $count);
+        $stockTone = $stock['out'] > 0 ? 'danger' : ($stock['alerts'] > 0 ? 'warning' : 'success');
+    @endphp
 
-    <link rel="stylesheet"
-          href="{{ asset('css/dashboard.css') }}">
-
-    <script src="{{ asset('js/auth-history.js') }}" defer></script>
-</head>
-
-<body>
-
-<nav class="navbar">
-    <div class="nav-inner">
-
-        <div class="brand">
-            <img src="{{ asset('images/chicago-logo-transparent.png') }}"
-                 alt="Chicago Chicken City">
-
-            <span>Inventory System</span>
+    <section class="ccc-hero is-compact">
+        <div>
+            <p class="ccc-eyebrow">Staff workspace</p>
+            <h1>Welcome back, {{ $user->name }}</h1>
+            <p class="ccc-hero-text">
+                Here is what needs attention today: stock to reorder, deliveries to receive and products close to expiry.
+            </p>
         </div>
 
-        <div class="nav-actions">
-
-            <span class="role">Staff</span>
-
-            <form method="POST" action="{{ route('logout') }}">
-                @csrf
-
-                <button type="submit" class="btn btn-outline">
-                    Logout
-                </button>
-            </form>
-
-        </div>
-    </div>
-</nav>
-
-<main class="container">
-
-    <header class="page-header">
-        <h1>Staff Dashboard</h1>
-
-        <p class="subtitle">
-            Welcome back, {{ $user->name }}!
-            Access your inventory management modules.
-        </p>
-    </header>
-
-    <section class="section">
-
-        <h2 class="section-title">Inventory Modules</h2>
-
-        <div class="grid">
-
-            
-<a href="{{ route('inventory.index') }}" class="card module-link">
-    <span class="module-label">MODULE 01</span>
-    <h3>Food &amp; Beverage Inventory</h3>
-    <p>
-        Manage ingredients, beverages
-        and stock levels.
-    </p>
-</a>
-
-
-
-            <!-- MODULE 02: SUPPLIER & PURCHASE MANAGEMENT -->
-            <a href="{{ route('suppliers.index') }}"
-               class="card module-link">
-
-                <span class="module-label">MODULE 02</span>
-
-                <h3>Supplier &amp; Purchase Management</h3>
-
-                <p>
-                    Manage suppliers and purchase records.
-                </p>
-
+        <div class="ccc-hero-meta">
+            <span class="ccc-chip"><x-icon name="calendar" /> {{ now()->format('l, j F Y') }}</span>
+            <a href="{{ route('notifications.index', $unreadCount > 0 ? ['filter' => 'unread'] : []) }}" class="ccc-chip is-link">
+                <x-icon name="bell" /> {{ $unreadCount }} unread {{ $plural('notification', $unreadCount) }}
             </a>
-
-
-            <!-- MODULE 03: STORAGE LOCATION MANAGEMENT -->
-            <a href="{{ route('storage-locations.index') }}"
-               class="card module-link">
-
-                <span class="module-label">MODULE 03</span>
-
-                <h3>Food Storage &amp; Inventory Location</h3>
-
-                <p>
-                    Track storage locations and stock placement.
-                </p>
-
-            </a>
-
-
-            <!-- MODULE 04 -->
-            <div class="card">
-
-                <span class="module-label">MODULE 04</span>
-
-                <h3>Waste &amp; Expiry Management</h3>
-
-                <p>
-                    Monitor expired items and food wastage.
-                </p>
-
-            </div>
-
         </div>
-
     </section>
 
-</main>
+    {{-- ========== KPIs ========== --}}
+    <section class="ccc-section" aria-labelledby="today-title">
+        <div class="ccc-section-head">
+            <h2 id="today-title" class="ccc-section-title">Today's operations</h2>
+            <p class="ccc-section-text">Live figures from the database</p>
+        </div>
 
-</body>
-</html>
+        <div class="ccc-stat-grid is-four">
+            <x-stat-card
+                label="Stock alerts"
+                :value="number_format($stock['alerts'])"
+                icon="alert"
+                :href="route('inventory.index', ['stock' => 'restock'])"
+                :tone="$stockTone"
+                :meta="$stock['low'] . ' low · ' . $stock['out'] . ' out of stock'"
+                :flag="$stock['alerts'] > 0 ? 'Needs attention' : null" />
+
+            <x-stat-card
+                label="Orders to receive"
+                :value="number_format($openOrderCount)"
+                icon="receive"
+                :href="route('purchases.index')"
+                meta="Pending or ordered purchase orders" />
+
+            <x-stat-card
+                label="Expiring soon"
+                :value="number_format($expiryWatchCount)"
+                icon="expiry"
+                href="#expiry-watch"
+                :tone="$expiryWatchCount > 0 ? 'warning' : null"
+                :meta="'Deliveries within ' . $expiryDays . ' ' . $plural('day', $expiryDays) . ' or expired this week'" />
+
+            <x-stat-card
+                label="Waste this week"
+                :value="number_format($wasteThisWeek)"
+                icon="waste"
+                :href="route('waste-expiry.index')"
+                :meta="$plural('Record', $wasteThisWeek) . ' in the last 7 days'" />
+        </div>
+    </section>
+
+    @include('dashboard._quick-actions')
+
+    <div class="ccc-dash-grid">
+        @include('dashboard._low-stock', ['span' => 'ccc-span-5'])
+        @include('dashboard._orders-to-receive', ['span' => 'ccc-span-7'])
+    </div>
+
+    <div class="ccc-dash-grid">
+        <div class="ccc-span-7 ccc-stack">
+            @include('dashboard._expiry-waste')
+            @include('dashboard._activity')
+        </div>
+
+        <div class="ccc-span-5 ccc-stack">
+            @include('dashboard._stock-status')
+            @include('dashboard._notifications')
+        </div>
+    </div>
+@endsection

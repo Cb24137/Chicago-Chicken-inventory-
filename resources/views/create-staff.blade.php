@@ -1,78 +1,65 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Add Staff | Chicago Chicken City</title>
-    <link rel="stylesheet" href="{{ asset('css/staff.css') }}">
-    <script src="{{ asset('js/auth-history.js') }}" defer></script>
-</head>
-<body>
+@extends('layouts.app')
 
-<nav>
-    <img src="{{ asset('images/chicago-logo-transparent.png') }}"
-         alt="Chicago Chicken City">
-    <a href="{{ route('admin.staff.index') }}"
-       class="btn btn-light">
-        Back to Staff
-    </a>
-</nav>
+@section('title', 'Add Staff')
 
-<main>
-    <div class="header">
-        <div>
-            <h1>Add New Staff</h1>
-            <p>Create a new employee account.</p>
-        </div>
-    </div>
+@section('content')
+    <x-page-header
+        eyebrow="Administration · Admin only"
+        title="Add New Staff"
+        description="Create a new employee account. New accounts have staff access."
+        :back="route('admin.staff.index')"
+        back-label="Back to staff" />
 
-    <div class="card form-card">
+    <form method="POST" action="{{ route('admin.staff.store') }}" class="ccc-card ccc-form-card">
+        @csrf
 
-        @if($errors->any())
-            <div class="alert error" role="alert">
-                <ul>
-                    @foreach($errors->all() as $error)
-                        <li>{{ $error }}</li>
-                    @endforeach
-                </ul>
+        <div class="ccc-form-section">
+            <h2 class="ccc-form-section-title">Account details</h2>
+            <p class="ccc-form-section-text">The staff member signs in with this email address and password.</p>
+
+            <div class="ccc-form-grid">
+                <div class="ccc-field">
+                    <label for="name" class="ccc-label">Full name <span class="ccc-required">*</span></label>
+                    <input id="name" type="text" name="name" required autocomplete="name"
+                           value="{{ old('name') }}"
+                           placeholder="Enter staff name"
+                           class="ccc-input @error('name') is-invalid @enderror">
+                    <x-field-error name="name" />
+                </div>
+
+                <div class="ccc-field">
+                    <label for="email" class="ccc-label">Email address <span class="ccc-required">*</span></label>
+                    <input id="email" type="email" name="email" required autocomplete="email"
+                           value="{{ old('email') }}"
+                           placeholder="Enter staff email"
+                           class="ccc-input @error('email') is-invalid @enderror">
+                    <x-field-error name="email" />
+                </div>
+
+                <div class="ccc-field">
+                    <label for="password" class="ccc-label">Password <span class="ccc-required">*</span></label>
+                    <input id="password" type="password" name="password" required minlength="5"
+                           autocomplete="new-password"
+                           placeholder="Minimum 5 characters"
+                           class="ccc-input @error('password') is-invalid @enderror">
+                    <x-field-error name="password" />
+                </div>
+
+                <div class="ccc-field">
+                    <label for="password_confirmation" class="ccc-label">Confirm password <span class="ccc-required">*</span></label>
+                    <input id="password_confirmation" type="password" name="password_confirmation" required minlength="5"
+                           autocomplete="new-password"
+                           placeholder="Confirm password"
+                           class="ccc-input">
+                </div>
             </div>
-        @endif
+        </div>
 
-        <form method="POST" action="{{ route('admin.staff.store') }}">
-            @csrf
-
-            <label for="name">Full Name</label>
-            <input id="name" type="text" name="name"
-                   value="{{ old('name') }}"
-                   placeholder="Enter staff name"
-                   autocomplete="name" required>
-
-            <label for="email">Email Address</label>
-            <input id="email" type="email" name="email"
-                   value="{{ old('email') }}"
-                   placeholder="Enter staff email"
-                   autocomplete="email" required>
-
-            <label for="password">Password</label>
-            <input id="password" type="password" name="password"
-                   placeholder="Minimum 5 characters"
-                   autocomplete="new-password"
-                   minlength="5" required>
-
-            <label for="password_confirmation">Confirm Password</label>
-            <input id="password_confirmation" type="password"
-                   name="password_confirmation"
-                   placeholder="Confirm password"
-                   autocomplete="new-password"
-                   minlength="5" required>
-
-            <button type="submit" class="btn btn-orange">
-                Create Staff Account
+        <div class="ccc-form-actions">
+            <button type="submit" class="ccc-btn ccc-btn-primary">
+                <x-icon name="check" /> Create Staff Account
             </button>
-        </form>
-
-    </div>
-</main>
-
-</body>
-</html>
+            <a href="{{ route('admin.staff.index') }}" class="ccc-btn ccc-btn-secondary">Cancel</a>
+        </div>
+    </form>
+@endsection
